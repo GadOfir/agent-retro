@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Agent Retro — Post-incident diagnostics for AI agents. Classify issues, find root causes, improve your agent system.">
+  <meta name="color-scheme" content="light dark">
+  <title>Agent Retro — Post-Incident Diagnostics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: rgba(15, 22, 40, 0.85);
+      --surface-solid: #0f1628;
+      --text: #e8ecf4;
+      --text-mid: #9aa3b8;
+      --text-dim: #5a6478;
+      --border: #1e2a42;
+      --grid-line: rgba(56, 120, 240, 0.06);
+      --grid-line-strong: rgba(56, 120, 240, 0.12);
+
+      --neon-blue: #5b9ef5;
+      --neon-purple: #a78bfa;
+      --neon-green: #34d399;
+      --neon-amber: #f5b942;
+      --neon-pink: #f472b6;
+      --neon-cyan: #22d3ee;
+
+      --neon-blue-soft: rgba(91, 158, 245, 0.1);
+      --neon-purple-soft: rgba(167, 139, 250, 0.1);
+      --neon-green-soft: rgba(52, 211, 153, 0.1);
+      --neon-amber-soft: rgba(245, 185, 66, 0.1);
+      --neon-pink-soft: rgba(244, 114, 182, 0.1);
+      --neon-cyan-soft: rgba(34, 211, 238, 0.1);
+
+      --radius: 14px;
+      --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f0e8;
+        --surface: rgba(255, 255, 255, 0.85);
+        --surface-solid: #ffffff;
+        --text: #1a1a1a;
+        --text-mid: #5c5c5c;
+        --text-dim: #8c8c8c;
+        --border: #e0d8cc;
+        --grid-line: rgba(180, 160, 130, 0.08);
+        --grid-line-strong: rgba(180, 160, 130, 0.15);
+        --neon-blue: #2563eb;
+        --neon-purple: #7c3aed;
+        --neon-green: #059669;
+        --neon-amber: #d97706;
+        --neon-pink: #db2777;
+        --neon-cyan: #0891b2;
+        --neon-blue-soft: rgba(37, 99, 235, 0.08);
+        --neon-purple-soft: rgba(124, 58, 237, 0.08);
+        --neon-green-soft: rgba(5, 150, 105, 0.08);
+        --neon-amber-soft: rgba(217, 119, 6, 0.08);
+        --neon-pink-soft: rgba(219, 39, 119, 0.08);
+        --neon-cyan-soft: rgba(8, 145, 178, 0.08);
+      }
+    }
+
+    [data-theme="light"] {
+      --bg: #f5f0e8; --surface: rgba(255,255,255,0.85); --surface-solid: #fff;
+      --text: #1a1a1a; --text-mid: #5c5c5c; --text-dim: #8c8c8c; --border: #e0d8cc;
+      --grid-line: rgba(180,160,130,0.08); --grid-line-strong: rgba(180,160,130,0.15);
+      --neon-blue: #2563eb; --neon-purple: #7c3aed; --neon-green: #059669;
+      --neon-amber: #d97706; --neon-pink: #db2777; --neon-cyan: #0891b2;
+      --neon-blue-soft: rgba(37,99,235,0.08); --neon-purple-soft: rgba(124,58,237,0.08);
+      --neon-green-soft: rgba(5,150,105,0.08); --neon-amber-soft: rgba(217,119,6,0.08);
+      --neon-pink-soft: rgba(219,39,119,0.08); --neon-cyan-soft: rgba(8,145,178,0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0a0e1a; --surface: rgba(15,22,40,0.85); --surface-solid: #0f1628;
+      --text: #e8ecf4; --text-mid: #9aa3b8; --text-dim: #5a6478; --border: #1e2a42;
+      --grid-line: rgba(56,120,240,0.06); --grid-line-strong: rgba(56,120,240,0.12);
+      --neon-blue: #5b9ef5; --neon-purple: #a78bfa; --neon-green: #34d399;
+      --neon-amber: #f5b942; --neon-pink: #f472b6; --neon-cyan: #22d3ee;
+      --neon-blue-soft: rgba(91,158,245,0.1); --neon-purple-soft: rgba(167,139,250,0.1);
+      --neon-green-soft: rgba(52,211,153,0.1); --neon-amber-soft: rgba(245,185,66,0.1);
+      --neon-pink-soft: rgba(244,114,182,0.1); --neon-cyan-soft: rgba(34,211,238,0.1);
+    }
+
+    html { scroll-padding-top: 3.5rem; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(var(--grid-line-strong) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line-strong) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+      background-position: center center;
+    }
+
+    .wrap { max-width: 880px; margin: 0 auto; padding: 0 2rem; }
+
+    /* ---- Top nav ---- */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: center; align-items: center; gap: 0.4rem;
+      padding: 0.8rem 1rem; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    }
+
+    .topnav a, .topnav button {
+      font-family: var(--mono); font-size: 0.88rem; font-weight: 600;
+      color: var(--text-mid); text-decoration: none; background: none;
+      border: 1px solid transparent; border-radius: 8px; padding: 0.45rem 1rem;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+
+    .topnav a:hover, .topnav button:hover { color: var(--text); border-color: var(--border); }
+    .topnav .sep { color: var(--border); font-size: 0.8rem; user-select: none; }
+
+    /* ---- Hero ---- */
+    .hero {
+      padding: clamp(5rem, 12vh, 8rem) 0 2rem;
+      text-align: center;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .hero h1 {
+      font-family: var(--sans);
+      font-size: clamp(3rem, 7vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 .neon { color: var(--neon-blue); text-shadow: 0 0 40px rgba(91, 158, 245, 0.3); }
+
+    .tone-sarcastic h1 .neon { color: var(--neon-pink); text-shadow: 0 0 40px rgba(244,114,182,0.3); }
+    .tone-friendly h1 .neon { color: var(--neon-green); text-shadow: 0 0 40px rgba(52,211,153,0.3); }
+    .tone-urgent h1 .neon { color: var(--neon-amber); text-shadow: 0 0 40px rgba(245,185,66,0.3); }
+    .tone-professional h1 .neon { color: var(--neon-blue); text-shadow: 0 0 40px rgba(91,158,245,0.3); }
+
+    .hero-sub {
+      font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+      color: var(--text-mid);
+      max-width: 520px;
+      margin: 0 auto 1.8rem;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    .hero-extra {
+      font-size: 1rem;
+      color: var(--neon-green);
+      margin-top: 0.5rem;
+    }
+
+    .terminal {
+      display: inline-block;
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem 2rem;
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      text-align: left;
+      line-height: 2.2;
+      backdrop-filter: blur(12px);
+    }
+
+    .terminal .prompt { color: var(--neon-green); font-weight: 600; }
+    .terminal .cmd { color: var(--text); }
+    .terminal .arg { color: var(--neon-cyan); }
+    .terminal .cmt { color: var(--text-dim); }
+
+    /* ---- Section ---- */
+    section { padding: 2.5rem 0; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    section h2 {
+      font-family: var(--sans);
+      font-size: clamp(1.6rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+
+    section > .desc {
+      color: var(--text-mid);
+      font-size: 1.05rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Cards ---- */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.6rem;
+      border-top: 3px solid transparent;
+      transition: transform 0.15s, box-shadow 0.15s;
+      animation: fadeUp 0.5s ease-out both;
+      backdrop-filter: blur(12px);
+    }
+
+    .card:hover { transform: translateY(-3px); }
+
+    .card .card-name {
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .card .card-what {
+      font-size: 0.95rem;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+
+    .card .card-try {
+      margin-top: 0.9rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .card:nth-child(6n+1) { border-top-color: var(--neon-blue); }
+    .card:nth-child(6n+2) { border-top-color: var(--neon-green); }
+    .card:nth-child(6n+3) { border-top-color: var(--neon-amber); }
+    .card:nth-child(6n+4) { border-top-color: var(--neon-pink); }
+    .card:nth-child(6n+5) { border-top-color: var(--neon-cyan); }
+    .card:nth-child(6n+6) { border-top-color: var(--neon-purple); }
+    .card:nth-child(6n+1) .card-name { color: var(--neon-blue); }
+    .card:nth-child(6n+2) .card-name { color: var(--neon-green); }
+    .card:nth-child(6n+3) .card-name { color: var(--neon-amber); }
+    .card:nth-child(6n+4) .card-name { color: var(--neon-pink); }
+    .card:nth-child(6n+5) .card-name { color: var(--neon-cyan); }
+    .card:nth-child(6n+6) .card-name { color: var(--neon-purple); }
+    .card:nth-child(6n+1):hover { box-shadow: 0 8px 32px rgba(91,158,245,0.15); }
+    .card:nth-child(6n+2):hover { box-shadow: 0 8px 32px rgba(52,211,153,0.15); }
+    .card:nth-child(6n+3):hover { box-shadow: 0 8px 32px rgba(245,185,66,0.15); }
+    .card:nth-child(6n+4):hover { box-shadow: 0 8px 32px rgba(244,114,182,0.15); }
+    .card:nth-child(6n+5):hover { box-shadow: 0 8px 32px rgba(34,211,238,0.15); }
+    .card:nth-child(6n+6):hover { box-shadow: 0 8px 32px rgba(167,139,250,0.15); }
+
+    /* ---- Steps ---- */
+    .steps { display: grid; gap: 2rem; }
+
+    .step {
+      display: grid;
+      grid-template-columns: 3.2rem 1fr;
+      gap: 1.2rem;
+      align-items: start;
+      animation: fadeUp 0.4s ease-out both;
+    }
+
+    .step:nth-child(1) .num { background: var(--neon-green-soft); color: var(--neon-green); border: 1px solid rgba(52,211,153,0.2); }
+    .step:nth-child(2) .num { background: var(--neon-blue-soft); color: var(--neon-blue); border: 1px solid rgba(91,158,245,0.2); }
+    .step:nth-child(3) .num { background: var(--neon-purple-soft); color: var(--neon-purple); border: 1px solid rgba(167,139,250,0.2); }
+    .step:nth-child(4) .num { background: var(--neon-amber-soft); color: var(--neon-amber); border: 1px solid rgba(245,185,66,0.2); }
+    .step:nth-child(2) { animation-delay: 0.08s; }
+    .step:nth-child(3) { animation-delay: 0.16s; }
+    .step:nth-child(4) { animation-delay: 0.24s; }
+
+    .num {
+      width: 3.2rem; height: 3.2rem;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-weight: 700; font-size: 1.1rem;
+      border-radius: 10px;
+    }
+
+    .step h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .step p { font-size: 1rem; color: var(--text-mid); line-height: 1.6; }
+    .step code {
+      background: var(--surface-solid); border: 1px solid var(--border);
+      padding: 0.15rem 0.45rem; border-radius: 6px; font-size: 0.88rem;
+      font-family: var(--mono); font-weight: 500;
+    }
+
+    /* ---- Tree (Structure) ---- */
+    .tree {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 2.5rem;
+      font-family: var(--mono);
+      font-size: 0.92rem;
+      line-height: 2.3;
+      overflow-x: auto;
+      backdrop-filter: blur(12px);
+    }
+    .tree .f { font-weight: 700; }
+    .tree .c { color: var(--text-dim); font-weight: 400; }
+    .tree .b  { color: var(--neon-blue); }
+    .tree .g  { color: var(--neon-green); }
+    .tree .a  { color: var(--neon-amber); }
+    .tree .p  { color: var(--neon-pink); }
+    .tree .cy { color: var(--neon-cyan); }
+    .tree .pr { color: var(--neon-purple); }
+
+    /* ---- Why section ---- */
+    .point {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+      margin-bottom: 2.5rem;
+    }
+
+    .point h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; }
+    .point p { font-size: 1.05rem; color: var(--text-mid); line-height: 1.7; }
+    .point p + p { margin-top: 0.8rem; }
+    .point .highlight { color: var(--text); font-weight: 600; }
+
+    /* ---- Spotlight ---- */
+    .spotlight {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+      border-top: 3px solid var(--neon-amber);
+    }
+
+    .spotlight h3 {
+      font-family: var(--mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--neon-amber);
+      margin-bottom: 0.8rem;
+    }
+
+    .spotlight p {
+      font-size: 1.02rem;
+      color: var(--text-mid);
+      line-height: 1.7;
+    }
+
+    .spotlight p + p { margin-top: 0.8rem; }
+    .spotlight .highlight { color: var(--text); font-weight: 600; }
+    .spotlight code {
+      background: var(--surface-solid); border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem; border-radius: 5px; font-size: 0.88rem;
+      font-family: var(--mono); font-weight: 500;
+    }
+
+    /* ---- Use cases ---- */
+    .cases {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .case {
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border-left: 3px solid transparent;
+      backdrop-filter: blur(8px);
+    }
+
+    .case:nth-child(6n+1) { background: var(--neon-blue-soft); border-left-color: var(--neon-blue); }
+    .case:nth-child(6n+2) { background: var(--neon-green-soft); border-left-color: var(--neon-green); }
+    .case:nth-child(6n+3) { background: var(--neon-amber-soft); border-left-color: var(--neon-amber); }
+    .case:nth-child(6n+4) { background: var(--neon-pink-soft); border-left-color: var(--neon-pink); }
+    .case:nth-child(6n+5) { background: var(--neon-purple-soft); border-left-color: var(--neon-purple); }
+    .case:nth-child(6n+6) { background: var(--neon-cyan-soft); border-left-color: var(--neon-cyan); }
+
+    .case h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .case p { font-size: 0.92rem; color: var(--text-mid); line-height: 1.6; }
+    .case code {
+      background: var(--surface-solid); border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem; border-radius: 5px; font-size: 0.82rem;
+      font-family: var(--mono); font-weight: 500;
+    }
+
+    /* ---- Concepts (docs) ---- */
+    .concepts { display: grid; gap: 1.5rem; }
+
+    .concept {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem 2.5rem;
+      backdrop-filter: blur(12px);
+      border-left: 3px solid transparent;
+    }
+
+    .concept:nth-child(6n+1) { border-left-color: var(--neon-green); }
+    .concept:nth-child(6n+2) { border-left-color: var(--neon-blue); }
+    .concept:nth-child(6n+3) { border-left-color: var(--neon-purple); }
+    .concept:nth-child(6n+4) { border-left-color: var(--neon-amber); }
+    .concept:nth-child(6n+5) { border-left-color: var(--neon-cyan); }
+    .concept:nth-child(6n+6) { border-left-color: var(--neon-pink); }
+
+    .concept h3 {
+      font-family: var(--mono); font-size: 1.05rem; font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .concept:nth-child(6n+1) h3 { color: var(--neon-green); }
+    .concept:nth-child(6n+2) h3 { color: var(--neon-blue); }
+    .concept:nth-child(6n+3) h3 { color: var(--neon-purple); }
+    .concept:nth-child(6n+4) h3 { color: var(--neon-amber); }
+    .concept:nth-child(6n+5) h3 { color: var(--neon-cyan); }
+    .concept:nth-child(6n+6) h3 { color: var(--neon-pink); }
+
+    .concept p { font-size: 0.98rem; color: var(--text-mid); line-height: 1.7; }
+    .concept p + p { margin-top: 0.7rem; }
+    .concept .highlight { color: var(--text); font-weight: 600; }
+    .concept code {
+      background: var(--surface-solid); border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem; border-radius: 5px; font-size: 0.86rem;
+      font-family: var(--mono); font-weight: 500;
+    }
+
+    .concept-list {
+      margin: 0.6rem 0; padding-left: 1.2rem;
+      color: var(--text-mid); font-size: 0.95rem; line-height: 1.8;
+    }
+
+    .concept-list code {
+      background: var(--surface-solid); border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem; border-radius: 5px; font-size: 0.84rem;
+      font-family: var(--mono); font-weight: 500;
+    }
+
+    /* ---- FAQ ---- */
+    .faq { display: grid; gap: 0.6rem; }
+
+    .faq details {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); backdrop-filter: blur(12px); overflow: hidden;
+    }
+
+    .faq summary {
+      padding: 1.2rem 1.8rem; cursor: pointer; font-weight: 600;
+      font-size: 1rem; list-style: none;
+      display: flex; align-items: center; gap: 0.8rem; user-select: none;
+    }
+
+    .faq summary::-webkit-details-marker { display: none; }
+
+    .faq summary::before {
+      content: "+"; font-family: var(--mono); font-size: 1.2rem;
+      font-weight: 700; color: var(--neon-purple); width: 1.5rem;
+      flex-shrink: 0; transition: transform 0.2s;
+    }
+
+    .faq details[open] summary::before { content: "\2212"; }
+
+    .faq .faq-body {
+      padding: 0 1.8rem 1.4rem 3.8rem;
+      color: var(--text-mid); font-size: 0.95rem; line-height: 1.7;
+    }
+
+    .faq .faq-body code {
+      background: var(--surface-solid); border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem; border-radius: 5px; font-size: 0.84rem;
+      font-family: var(--mono); font-weight: 500;
+    }
+
+    .faq .faq-body p + p { margin-top: 0.6rem; }
+
+    /* ---- About ---- */
+    .about-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2.5rem;
+      backdrop-filter: blur(12px); border-top: 3px solid var(--neon-purple);
+      display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start;
+    }
+
+    @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } }
+
+    .about-card h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .about-card .role {
+      font-family: var(--mono); font-size: 0.9rem; color: var(--neon-purple);
+      font-weight: 600; margin-bottom: 0.8rem;
+    }
+    .about-card p { font-size: 1rem; color: var(--text-mid); line-height: 1.7; }
+
+    .about-meta {
+      font-family: var(--mono); font-size: 0.82rem;
+      color: var(--text-dim); line-height: 2; text-align: right; white-space: nowrap;
+    }
+
+    .about-source {
+      margin-top: 1rem; font-family: var(--mono); font-size: 0.78rem;
+      color: var(--text-dim); font-style: italic;
+    }
+
+    /* ---- Docs subsections ---- */
+    .docs-sub { margin-top: 2.5rem; }
+
+    .docs-sub-label {
+      font-family: var(--mono); font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      padding: 3.5rem 0; text-align: center; color: var(--text-dim);
+      font-size: 0.9rem; border-top: 1px solid var(--border); margin-top: 3rem;
+    }
+
+    footer a { color: var(--neon-purple); text-decoration: none; font-weight: 500; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ---- Animations ---- */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <nav class="topnav">
+    <a href="#">Home</a>
+    <button onclick="toggleTheme()"><span class="theme-icon">&#9789;</span> Theme</button>
+  </nav>
+
+  <div class="wrap">
+
+    <!-- Hero -->
+    <header class="hero tone-professional">
+      <h1><span class="neon">Agent Retro</span></h1>
+      <p class="hero-sub">Post-incident diagnostics for AI agents.</p>
+      <p class="hero-extra">When your agent ships something wrong, find out WHY so it never happens again.</p>
+      <div class="terminal">
+        <span class="prompt">$</span> <span class="cmd">ls -la .claude/skills/agent-retro/</span>
+        <span class="cmt"># See what happened. Not from memory — from evidence.</span>
+        <span class="prompt">$</span> <span class="cmd">cat .claude/skills/agent-retro/NOTES.md</span>
+        <span class="cmt"># Lessons learned. Deduped. Escalated when repeated.</span>
+      </div>
+    </header>
+
+    <!-- Features -->
+    <section>
+      <div class="section-label" style="color: var(--neon-purple);">Features</div>
+      <h2>What Agent Retro gives you</h2>
+      <p class="desc">Not a post-mortem. A diagnostic framework that classifies every failure mode and prescribes the fix.</p>
+      <div class="cards">
+        <div class="card">
+          <div class="card-name">CX-CANDIDATE</div>
+          <p class="card-what">Missing or vague rule that would have prevented the failure. File a gap and update the contract. Fix the system, not the symptom.</p>
+          <div class="card-try">"The docs were silent on this" → CX gap</div>
+        </div>
+        <div class="card">
+          <div class="card-name">VERIFICATION-GAP</div>
+          <p class="card-what">Agent claimed success but proof was below claim level. A fix shipped without evidence it actually worked. Flag the overstated hand-back.</p>
+          <div class="card-try">"Seems fine" is not a test.</div>
+        </div>
+        <div class="card">
+          <div class="card-name">AGENT-NOTE</div>
+          <p class="card-what">Bad call despite available info — wrong assumption, ignored contract, over-engineered. Append to NOTES.md. Second occurrence auto-escalates.</p>
+          <div class="card-try">NOTES.md → deduped → CX</div>
+        </div>
+        <div class="card">
+          <div class="card-name">OPERATOR-NOTE</div>
+          <p class="card-what">Ambiguous instructions or missing clarifying questions. Not a file — report inline. Improves operator-agent communication.</p>
+          <div class="card-try">"You should have asked"</div>
+        </div>
+        <div class="card">
+          <div class="card-name">CODE-SMELL</div>
+          <p class="card-what">Confusing code — misleading names, dead code that looks alive. One line + pointer in SMELLS.md. No essays. Not runtime state.</p>
+          <div class="card-try">SMELLS.md → one line per smell</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section>
+      <div class="section-label" style="color: var(--neon-green);">Protocol</div>
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div>
+            <h3>Reconstruct from evidence</h3>
+            <p>Git log, hand-back tables, RESULT.md, CX gaps filed mid-session, dead-approaches register. Every claim re-derived from an artifact — never from narrative memory.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div>
+            <h3>Classify each issue</h3>
+            <p>Five classes: CX-CANDIDATE, VERIFICATION-GAP, AGENT-NOTE, OPERATOR-NOTE, CODE-SMELL. Each has a definition and a prescribed action.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div>
+            <h3>Output mandatory sections</h3>
+            <p>Structured output summarizing findings, root causes, and fixes per class.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <div>
+            <h3>Apply the fixes</h3>
+            <p>File CX gaps, update contracts, append to NOTES.md (deduped), update dead-approaches register, append to SMELLS.md. Observe first — fix the system, not the blame.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Structure -->
+    <section>
+      <div class="section-label" style="color: var(--neon-blue);">Structure</div>
+      <h2>What's in the folder</h2>
+      <p class="desc">Three files. Zero dependencies.</p>
+      <div class="tree">
+        <span class="g">SKILL.md</span>   <span class="c">The retro protocol — classification + workflow</span><br>
+        <span class="g">NOTES.md</span>   <span class="c">Agent-improvement log (created on first use)</span><br>
+        <span class="g">SMELLS.md</span>  <span class="c">Confusing code log (created on first use)</span>
+      </div>
+    </section>
+
+    <!-- Why -->
+    <section>
+      <div class="section-label" style="color: var(--neon-amber);">Why</div>
+      <h2>A retro that retrofits your system</h2>
+      <div class="point">
+        <h3>The problem</h3>
+        <p>AI agents make bad calls. They ship fixes without evidence. They repeat mistakes. They make assumptions that were never written down. Without a structured retro, every session starts from zero and the same failures recur.</p>
+      </div>
+      <div class="point">
+        <h3>The fix</h3>
+        <p><span class="highlight">Evidence-based classification.</span> Every issue lands in one of five classes. Each class has a prescribed action. CX gaps update the contract. AGENT-NOTEs get deduped and escalate on recurrence. The system improves over time because the retro fixes the guide rails, not the person.</p>
+      </div>
+      <div class="point">
+        <h3>The edge</h3>
+        <p>No blame. The agent didn't fail — the system failed to guide it. Retro fixes the system. When the retro blames the agent, the agent learns nothing. When it fixes the contracts, every session gets better.</p>
+      </div>
+    </section>
+
+    <!-- Spotlight -->
+    <section>
+      <div class="section-label" style="color: var(--neon-pink);">The core</div>
+      <h2>Five classes. One root cause each.</h2>
+      <div class="spotlight">
+        <h3>The classification matrix</h3>
+        <p>Every failure mode maps to exactly one class. CX-CANDIDATE means a rule was missing — file a gap and the system learns. VERIFICATION-GAP means proof didn't match the claim — the testing contract needs hardening. AGENT-NOTE means bad judgment despite available info — track it and escalate on repeat.</p>
+        <p>OPERATOR-NOTE means the instructions were ambiguous — report inline, no file. CODE-SMELL means the codebase was confusing — one line in SMELLS.md, no essay, never fix during retro.</p>
+        <p>This taxonomy prevents three common retro failures: vague blame ("the agent was bad"), unfixable action items ("be more careful"), and mixing cleanup with diagnosis. Classify first. Fix second.</p>
+      </div>
+    </section>
+
+    <!-- Use cases -->
+    <section>
+      <div class="section-label" style="color: var(--neon-cyan);">Use cases</div>
+      <h2>When to reach for this</h2>
+      <div class="cases">
+        <div class="case">
+          <h3>Post-deployment review</h3>
+          <p>A deploy shipped with issues. Run the retro to classify what went wrong and file CX gaps so the next deploy is safer.</p>
+        </div>
+        <div class="case">
+          <h3>Recurring agent mistake</h3>
+          <p>Same bad pattern appears twice. The retro detects recurrence and auto-escalates AGENT-NOTE to CX-CANDIDATE.</p>
+        </div>
+        <div class="case">
+          <h3>Agent handoff</h3>
+          <p>Agent A worked on a session. Agent B picks up the retro. The artifact trail gives B everything needed without repeating A's mistakes.</p>
+        </div>
+        <div class="case">
+          <h3>Pre-audit cleanup</h3>
+          <p>Before running a full contract audit, run a retro to catch known failure modes. Reduces audit noise.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section>
+      <div class="section-label" style="color: var(--neon-green);">FAQ</div>
+      <h2>Questions you'll ask after a rough session</h2>
+      <div class="faq">
+        <details>
+          <summary>How is this different from a post-mortem?</summary>
+          <div class="faq-body">
+            <p>A post-mortem assigns blame. Agent Retro classifies failure modes and fixes the system. CX gaps update contracts. NOTES.md dedupes lessons. The system gets better over time.</p>
+          </div>
+        </details>
+        <details>
+          <summary>When should I run this?</summary>
+          <div class="faq-body">
+            <p>When the agent shipped something but the journey was painful. After a deploy that required reverts. When you see a pattern repeat. NOT for product gaps — those go to your product process.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What if the same issue keeps happening?</summary>
+          <div class="faq-body">
+            <p>That is exactly what this skill catches. Second occurrence of an AGENT-NOTE pattern auto-escalates to CX-CANDIDATE. A recurring mistake is a missing rule, not bad luck.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Can I skip the evidence reconstruction?</summary>
+          <div class="faq-body">
+            <p>No. A retro built on memory alone re-creates the fabricated-timeline risk. Every claim must be re-derived from an artifact: git log, hand-back tables, RESULT.md, CX gaps. Commits alone are not enough.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+      <div class="section-label" style="color: var(--neon-purple);">About</div>
+      <h2>Who built this</h2>
+      <div class="about-card">
+        <div>
+          <h3>Gad</h3>
+          <div class="role">Backend/Systems engineer</div>
+          <p>Built Agent Retro after watching agents ship fixes without evidence, repeat the same mistakes, and claim "seems fine" without any proof. This skill makes the retro process systematic — classify the failure mode, fix the system, move on.</p>
+          <p class="about-source">Built with agents, for agents</p>
+        </div>
+        <div class="about-meta">
+          failure modes classified: 5<br>
+          rules enforced: 7<br>
+          version: v1.0
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <a href="https://github.com/GadOfir/agent-retro">GitHub</a> &middot;
+      MIT &middot;
+      Agent Retro &mdash; built with agents, for agents
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : (current === 'dark' ? 'light' :
+        (window.matchMedia('(prefers-color-scheme: light)').matches ? 'dark' : 'light'));
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('agent-retro-theme', next);
+      updateIcon(next);
+    }
+
+    function updateIcon(theme) {
+      const icon = document.querySelector('.theme-icon');
+      if (icon) icon.innerHTML = theme === 'light' ? '&#9789;' : '&#9788;';
+    }
+
+    (function() {
+      const saved = localStorage.getItem('agent-retro-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        updateIcon(saved);
+      } else if (prefersDark) {
+        updateIcon('dark');
+      } else {
+        updateIcon('light');
+      }
+    })();
+  </script>
+</body>
+</html>
