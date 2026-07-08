@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Agent Retro — Post-incident diagnostics for AI agents. Classify issues, find root causes, improve your agent system.">
+  <meta name="description" content="Agent Retro — End-of-session learning for AI agents. After a long session, the agent self-reports what went wrong. Triage by model, harness, and task step. Patterns emerge. The lifecycle improves.">
   <meta name="color-scheme" content="light dark">
-  <title>Agent Retro — Post-Incident Diagnostics</title>
+  <title>Agent Retro — End-of-Session Learning Loop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -549,81 +549,85 @@
     <!-- Hero -->
     <header class="hero tone-professional">
       <h1><span class="neon">Agent Retro</span></h1>
-      <p class="hero-sub">Post-incident diagnostics for AI agents.</p>
-      <p class="hero-extra">When your agent ships something wrong, find out WHY so it never happens again.</p>
+      <p class="hero-sub">After a long session, your agent fills this out. Patterns emerge.</p>
+      <p class="hero-extra">Triage every broken step by model, harness, and task. Find the common fix. Improve the lifecycle.</p>
       <div class="terminal">
-        <span class="prompt">$</span> <span class="cmd">ls -la .claude/skills/agent-retro/</span>
-        <span class="cmt"># See what happened. Not from memory — from evidence.</span>
-        <span class="prompt">$</span> <span class="cmd">cat .claude/skills/agent-retro/NOTES.md</span>
-        <span class="cmt"># Lessons learned. Deduped. Escalated when repeated.</span>
+        <span class="prompt">$</span> <span class="cmd">cat .claude/skills/agent-retro/SKILL.md</span>
+        <span class="cmt"># Agent just finished a 4-hour session. Now run the retro.</span>
+        <span class="prompt">$</span> <span class="cmd"># What model ran? What harness? Which step broke?</span>
+        <span class="cmt"># The agent self-reports. You triage. Patterns surface.</span>
       </div>
     </header>
 
     <!-- Features -->
     <section>
       <div class="section-label" style="color: var(--neon-purple);">Features</div>
-      <h2>What Agent Retro gives you</h2>
-      <p class="desc">Not a post-mortem. A diagnostic framework that classifies every failure mode and prescribes the fix.</p>
+      <h2>After a long session, triage what went wrong</h2>
+      <p class="desc">Your agent just worked for hours. Some steps succeeded. Some didn't. The retro captures what broke — organized so you can see patterns across sessions.</p>
       <div class="cards">
         <div class="card">
-          <div class="card-name">CX-CANDIDATE</div>
-          <p class="card-what">Missing or vague rule that would have prevented the failure. File a gap and update the contract. Fix the system, not the symptom.</p>
-          <div class="card-try">"The docs were silent on this" → CX gap</div>
+          <div class="card-name">Per model</div>
+          <p class="card-what">Which model was running when it broke? Claude 4? GPT-4o? o3-pro? Log it. After a few sessions you'll see which models struggle with which step types.</p>
+          <div class="card-try">"Claude 4 works great on refactors, struggles on test generation"</div>
         </div>
         <div class="card">
-          <div class="card-name">VERIFICATION-GAP</div>
-          <p class="card-what">Agent claimed success but proof was below claim level. A fix shipped without evidence it actually worked. Flag the overstated hand-back.</p>
-          <div class="card-try">"Seems fine" is not a test.</div>
+          <div class="card-name">Per harness</div>
+          <p class="card-what">Which harness was driving it? Claude Code? Codex? Cursor? Different harnesses have different context windows, different tool access. The same model behaves differently across them.</p>
+          <div class="card-try">"Same model, Codex got it right, Claude Code missed"</div>
         </div>
         <div class="card">
-          <div class="card-name">AGENT-NOTE</div>
-          <p class="card-what">Bad call despite available info — wrong assumption, ignored contract, over-engineered. Append to NOTES.md. Second occurrence auto-escalates.</p>
-          <div class="card-try">NOTES.md → deduped → CX</div>
+          <div class="card-name">Per task step</div>
+          <p class="card-what">What was the agent trying to do when it broke? Testing? Deployment? Architecture decision? Code review? Each step type has its own failure patterns.</p>
+          <div class="card-try">"Testing stage fails: agent writes tests that pass but don't test the right thing"</div>
         </div>
         <div class="card">
-          <div class="card-name">OPERATOR-NOTE</div>
-          <p class="card-what">Ambiguous instructions or missing clarifying questions. Not a file — report inline. Improves operator-agent communication.</p>
-          <div class="card-try">"You should have asked"</div>
+          <div class="card-name">Agent self-reports</div>
+          <p class="card-what">You don't need to reconstruct everything from logs. The agent fills out the retro itself — what went wrong, at which step, with which model, in which harness.</p>
+          <div class="card-try">"Step 3 broke. Model: Claude 4. Harness: Claude Code. Here's why."</div>
         </div>
         <div class="card">
-          <div class="card-name">CODE-SMELL</div>
-          <p class="card-what">Confusing code — misleading names, dead code that looks alive. One line + pointer in SMELLS.md. No essays. Not runtime state.</p>
-          <div class="card-try">SMELLS.md → one line per smell</div>
+          <div class="card-name">Classification baked in</div>
+          <p class="card-what">Each entry gets a class: was the rule missing (CX-CANDIDATE)? Was it a bad assumption (AGENT-NOTE)? Confusing code (CODE-SMELL)? The class prescribes the fix.</p>
+          <div class="card-try">CX-CANDIDATE &rarr; file a gap. AGENT-NOTE &rarr; track it. CODE-SMELL &rarr; log it.</div>
+        </div>
+        <div class="card">
+          <div class="card-name">Patterns over sessions</div>
+          <p class="card-what">One retro is noise. Five retros is a pattern. "Every time we use model X with harness Y on testing, it goes off the rails. Let's stop doing that."</p>
+          <div class="card-try">NOTES.md accumulates, dedupes, escalates on recurrence</div>
         </div>
       </div>
     </section>
 
-    <!-- How it works -->
     <section>
-      <div class="section-label" style="color: var(--neon-green);">Protocol</div>
-      <h2>How it works</h2>
+      <div class="section-label" style="color: var(--neon-green);">Workflow</div>
+      <h2>End-of-session loop</h2>
       <div class="steps">
         <div class="step">
           <div class="num">1</div>
           <div>
-            <h3>Reconstruct from evidence</h3>
-            <p>Git log, hand-back tables, RESULT.md, CX gaps filed mid-session, dead-approaches register. Every claim re-derived from an artifact — never from narrative memory.</p>
+            <h3>Agent finishes a session</h3>
+            <p>Your agent just spent hours on a task — coding, testing, deploying. Some steps worked. Some didn't. You're done coding. Now you capture the learning.</p>
           </div>
         </div>
         <div class="step">
           <div class="num">2</div>
           <div>
-            <h3>Classify each issue</h3>
-            <p>Five classes: CX-CANDIDATE, VERIFICATION-GAP, AGENT-NOTE, OPERATOR-NOTE, CODE-SMELL. Each has a definition and a prescribed action.</p>
+            <h3>Agent self-reports what went wrong</h3>
+            <p>Run the retro skill. The agent fills out: which step broke, which model was running, which harness was driving it, what happened. Evidence-based — not from memory, from the session artifacts.</p>
           </div>
         </div>
         <div class="step">
           <div class="num">3</div>
           <div>
-            <h3>Output mandatory sections</h3>
-            <p>Structured output summarizing findings, root causes, and fixes per class.</p>
+            <h3>You triage — model × harness × step</h3>
+            <p>Entries are organized three ways. Which models consistently struggle? Which harnesses produce different behavior? Which task steps are hotspots? The triage table surfaces patterns.</p>
           </div>
         </div>
         <div class="step">
           <div class="num">4</div>
           <div>
-            <h3>Apply the fixes</h3>
-            <p>File CX gaps, update contracts, append to NOTES.md (deduped), update dead-approaches register, append to SMELLS.md. Observe first — fix the system, not the blame.</p>
+            <h3>Improve the lifecycle</h3>
+            <p>Find the common fix. Update contracts. Refine model routing. Adjust harness config. The same pattern won't repeat. Next session starts from what the last one learned.</p>
           </div>
         </div>
       </div>
@@ -644,30 +648,30 @@
     <!-- Why -->
     <section>
       <div class="section-label" style="color: var(--neon-amber);">Why</div>
-      <h2>A retro that retrofits your system</h2>
+      <h2>Every long session is data you're throwing away</h2>
       <div class="point">
         <h3>The problem</h3>
-        <p>AI agents make bad calls. They ship fixes without evidence. They repeat mistakes. They make assumptions that were never written down. Without a structured retro, every session starts from zero and the same failures recur.</p>
+        <p>Your agent just worked for hours. Three steps succeeded, two failed, one took a detour. You ship the code but lose the learning. Next session, you route the same model to the same broken step. The lifecycle doesn't improve because nothing was captured.</p>
       </div>
       <div class="point">
         <h3>The fix</h3>
-        <p><span class="highlight">Evidence-based classification.</span> Every issue lands in one of five classes. Each class has a prescribed action. CX gaps update the contract. AGENT-NOTEs get deduped and escalate on recurrence. The system improves over time because the retro fixes the guide rails, not the person.</p>
+        <p><span class="highlight">End every long session with a retro.</span> The agent self-reports: what broke, which model, which harness, which step type. You triage into a table. Patterns emerge across sessions. "Every time Claude 4 runs testing in Codex, it misses edge cases." Fix it once — route a different model there next time.</p>
       </div>
       <div class="point">
         <h3>The edge</h3>
-        <p>No blame. The agent didn't fail — the system failed to guide it. Retro fixes the system. When the retro blames the agent, the agent learns nothing. When it fixes the contracts, every session gets better.</p>
+        <p>One retro teaches you about one session. Accumulate five and you have a map: this model works for that step type, this harness gives better results there, this step always needs a human review. Your agent lifecycle gets measurably better. Not because the AI improved — because your routing did.</p>
       </div>
     </section>
 
     <!-- Spotlight -->
     <section>
       <div class="section-label" style="color: var(--neon-pink);">The core</div>
-      <h2>Five classes. One root cause each.</h2>
+      <h2>Triage across three dimensions</h2>
       <div class="spotlight">
-        <h3>The classification matrix</h3>
-        <p>Every failure mode maps to exactly one class. CX-CANDIDATE means a rule was missing — file a gap and the system learns. VERIFICATION-GAP means proof didn't match the claim — the testing contract needs hardening. AGENT-NOTE means bad judgment despite available info — track it and escalate on repeat.</p>
-        <p>OPERATOR-NOTE means the instructions were ambiguous — report inline, no file. CODE-SMELL means the codebase was confusing — one line in SMELLS.md, no essay, never fix during retro.</p>
-        <p>This taxonomy prevents three common retro failures: vague blame ("the agent was bad"), unfixable action items ("be more careful"), and mixing cleanup with diagnosis. Classify first. Fix second.</p>
+        <h3>Model × Harness × Step</h3>
+        <p>After the agent self-reports, you sort every entry into a triage table. Model: which AI was running? Harness: which tool was driving it? Step: what was it trying to do when it broke? Each cell in this grid tells a story. One cell with five entries is a hotspot. One model dominating one step type is a routing problem.</p>
+        <p>The classification (CX-CANDIDATE, VERIFICATION-GAP, AGENT-NOTE, OPERATOR-NOTE, CODE-SMELL) tells you what kind of fix each entry needs. But the triage tells you where to aim it. "Testing steps keep failing under Claude 4 in Codex" is actionable. "Agent was bad" is not.</p>
+        <p>This is the difference between retro that feels like therapy and retro that actually improves your next session. Sort first. Classify second. Fix once.</p>
       </div>
     </section>
 
@@ -677,51 +681,58 @@
       <h2>When to reach for this</h2>
       <div class="cases">
         <div class="case">
-          <h3>Post-deployment review</h3>
-          <p>A deploy shipped with issues. Run the retro to classify what went wrong and file CX gaps so the next deploy is safer.</p>
+          <h3>Long coding session just finished</h3>
+          <p>Agent worked for 2+ hours. Multiple steps: scaffolding, logic, tests, deploy. Some steps were smooth, others were a fight. Run the retro and log what happened per step.</p>
         </div>
         <div class="case">
-          <h3>Recurring agent mistake</h3>
-          <p>Same bad pattern appears twice. The retro detects recurrence and auto-escalates AGENT-NOTE to CX-CANDIDATE.</p>
+          <h3>Testing stage keeps failing</h3>
+          <p>Agent writes tests that pass but don't actually test the right thing. Or tests fail for reasons the agent can't diagnose. Run retro to capture: which model, which harness, what confused it.</p>
         </div>
         <div class="case">
-          <h3>Agent handoff</h3>
-          <p>Agent A worked on a session. Agent B picks up the retro. The artifact trail gives B everything needed without repeating A's mistakes.</p>
+          <h3>Agent got stuck in a confusion loop</h3>
+          <p>Agent tried approach A, reverted, tried B, reverted, tried A again. Two hours wasted. Retro captures what it was confused about — was it the code? The architecture? Missing context?</p>
         </div>
         <div class="case">
-          <h3>Pre-audit cleanup</h3>
-          <p>Before running a full contract audit, run a retro to catch known failure modes. Reduces audit noise.</p>
+          <h3>Session ran across multiple models</h3>
+          <p>You routed different models to different steps. Retro logs which model handled which step and how each performed. Next session, your routing is data-driven.</p>
+        </div>
+        <div class="case">
+          <h3>Weekly review of agent performance</h3>
+          <p>Accumulate retro entries over a week. Sort by model, harness, step type. "Claude 4 handles refactors perfectly. GPT-4o keeps inventing APIs that don't exist. o3-pro is best on testing." Your lifecycle is now evidence-based.</p>
+        </div>
+        <div class="case">
+          <h3>Onboarding a new harness</h3>
+          <p>You just added Codex to your workflow. Run retros for the first week to see how it compares to Claude Code on each step type. Data tells you where each harness belongs.</p>
         </div>
       </div>
     </section>
 
-    <!-- FAQ -->
     <section>
       <div class="section-label" style="color: var(--neon-green);">FAQ</div>
-      <h2>Questions you'll ask after a rough session</h2>
+      <h2>Questions you'll have after a session</h2>
       <div class="faq">
         <details>
-          <summary>How is this different from a post-mortem?</summary>
+          <summary>My agent just finished a 4-hour session. What do I do?</summary>
           <div class="faq-body">
-            <p>A post-mortem assigns blame. Agent Retro classifies failure modes and fixes the system. CX gaps update contracts. NOTES.md dedupes lessons. The system gets better over time.</p>
+            <p>Run the retro skill. Tell your agent: "run a retro on this session." The agent self-reports: which steps broke, which model was running, which harness, what went wrong. You triage the results and look for patterns.</p>
           </div>
         </details>
         <details>
-          <summary>When should I run this?</summary>
+          <summary>Should I run this after every session or only bad ones?</summary>
           <div class="faq-body">
-            <p>When the agent shipped something but the journey was painful. After a deploy that required reverts. When you see a pattern repeat. NOT for product gaps — those go to your product process.</p>
+            <p>After every long session — even the smooth ones. Sessions that went well still have edges: a step that was slower than expected, a model that needed extra prompting, a harness that lost context. Patterns emerge from volume, not just from failures.</p>
           </div>
         </details>
         <details>
-          <summary>What if the same issue keeps happening?</summary>
+          <summary>How do I know which model to use for which step?</summary>
           <div class="faq-body">
-            <p>That is exactly what this skill catches. Second occurrence of an AGENT-NOTE pattern auto-escalates to CX-CANDIDATE. A recurring mistake is a missing rule, not bad luck.</p>
+            <p>Run retros for a week. Sort by model × step type. The data tells you. "Claude 4 handles refactors and deploys cleanly. O3-pro is better at test generation. GPT-4o struggles with architecture decisions." Your routing becomes evidence-based, not gut-feel.</p>
           </div>
         </details>
         <details>
-          <summary>Can I skip the evidence reconstruction?</summary>
+          <summary>What's the difference between a model issue and a harness issue?</summary>
           <div class="faq-body">
-            <p>No. A retro built on memory alone re-creates the fabricated-timeline risk. Every claim must be re-derived from an artifact: git log, hand-back tables, RESULT.md, CX gaps. Commits alone are not enough.</p>
+            <p>Same model, different harness = harness issue. Claude 4 in Claude Code vs Claude 4 in Codex — they have different context windows, different tool access. The retro captures which harness produces better results for each step type.</p>
           </div>
         </details>
       </div>
@@ -735,17 +746,16 @@
         <div>
           <h3>Gad</h3>
           <div class="role">Backend/Systems engineer</div>
-          <p>Built Agent Retro after watching agents ship fixes without evidence, repeat the same mistakes, and claim "seems fine" without any proof. This skill makes the retro process systematic — classify the failure mode, fix the system, move on.</p>
+          <p>Built Agent Retro after watching agents work for hours — succeed on some steps, struggle on others — with no way to capture WHY. Every session was isolated. No learning carried forward. Agent Retro turns every session into a learning artifact, organized by model, harness, and task step. The lifecycle gets better every run.</p>
           <p class="about-source">Built with agents, for agents</p>
         </div>
         <div class="about-meta">
-          failure modes classified: 5<br>
-          rules enforced: 7<br>
+          triage dimensions: 3 (model, harness, step)<br>
+          classification classes: 5<br>
           version: v1.0
         </div>
       </div>
     </section>
-
   </div>
 
   <footer>
