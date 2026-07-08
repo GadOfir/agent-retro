@@ -59,6 +59,27 @@ This skill is a framework. To adapt it to your project:
 | Triage feels random | Not logging model/harness consistently | Standardize: every entry gets model + harness + step |
 | Same issue keeps recurring | AGENT-NOTE wasn't deduped | NOTES.md auto-dedupes on second occurrence |
 
+## Part of the Kingdom of God
+
+One of the skills in the [Kingdom of God](https://gadofir.github.io/kingdom-of-god/) — a persona-matrix skill router (God → King → Workers). Agent Retro is the learning stage — end-of-session self-report, triaged by model × harness × step.
+
+| Skill | Stage | Link |
+|---|---|---|
+| Kingdom of God | Router | https://gadofir.github.io/kingdom-of-god/ |
+| GodsPlan | Planning | https://gadofir.github.io/godsplan/ |
+| CONTRACTX | Contracts | https://gadofir.github.io/contractx-starter/ |
+| Shit Hit The Fan | Triage | https://gadofir.github.io/shit-hit-the-fan/ |
+| Agent Retro | Learning | https://gadofir.github.io/agent-retro/ |
+| LOS | Memory (optional) | https://gadofir.github.io/LOS-starter/ |
+
+### Plug-in skills feed the retro
+
+External skills can plug in to sharpen the retro. Reference them by link (always
+latest) and wire them to this stage. Example:
+[improve-codebase-architecture](https://github.com/mattpocock/skills/tree/main/skills/engineering/improve-codebase-architecture)
+— during the retro the agent references what a good architecture looks like and
+checks whether its changes drifted the structure or missed a seam.
+
 ## License
 
 MIT
