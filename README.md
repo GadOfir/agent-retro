@@ -1,7 +1,6 @@
 # Agent Retro
 
-**Post-incident diagnostics for AI agents.** Classify what went wrong, file
-CX gaps, and improve your agent system — one session at a time.
+**End-of-session learning for AI agents.** After a long session, the agent self-reports what went wrong. Triage by model, harness, and task step. Patterns emerge. The lifecycle improves.
 
 ## Quick start
 
@@ -13,50 +12,52 @@ cp SKILL.md .claude/skills/agent-retro/
 
 Then tell your agent:
 
-> **"Run a retrospective on the last session."**
+> **"Run a retrospective on this session."**
 
-The agent reads the skill, reconstructs what happened from evidence, classifies
-each issue into one of five classes, and prescribes the fix.
+The agent self-reports: which step broke, which model was running, which harness was driving it. You triage by model × harness × step. Patterns emerge across sessions.
 
 ## What you get
 
 | File | Purpose |
 |---|---|
 | `index.html` | GitHub Pages landing page |
-| `SKILL.md` | The retro protocol — classification + workflow |
-| `NOTES.md` | Agent-improvement log (created on first use) |
+| `SKILL.md` | The retro skill — agent reads this and fills out what went wrong |
+| `NOTES.md` | Accumulated learning log (created on first use) |
 | `SMELLS.md` | Confusing code log (created on first use) |
 
-## The five classes
+## How it works
 
-| Class | What it means | What to do |
+1. **Agent finishes a long session** — hours of coding, testing, deploying. Some steps smooth, some rough.
+2. **Agent self-reports** — you run the retro skill. The agent fills out what broke: which step, which model, which harness.
+3. **You triage** — sort entries across three dimensions: model, harness, task step. Hotspots become visible.
+4. **Improve the lifecycle** — route the right model to the right step. Adjust harness config. Next session starts from what the last one learned.
+
+## The triage dimensions
+
+| Dimension | Question | Value |
 |---|---|---|
-| **CX-CANDIDATE** | Missing rule would have prevented this | File CX gap + update contract |
-| **VERIFICATION-GAP** | Agent claimed success, proof was weak | Flag hand-back, harden testing |
-| **AGENT-NOTE** | Bad call despite available info | Append to NOTES.md (deduped) |
-| **OPERATOR-NOTE** | Instructions were ambiguous | Report inline, no file |
-| **CODE-SMELL** | Codebase was confusing | Append to SMELLS.md (one line) |
+| **Model** | Which AI was running? | "Claude 4 struggles on test generation, GPT-4o invents APIs" |
+| **Harness** | Which tool was driving it? | "Same model — Codex got it right, Claude Code missed" |
+| **Step** | What was it trying to do? | "Testing stage, refactor stage, deploy stage — each has its own failure pattern" |
+
+The 5 built-in classes (CX-CANDIDATE, VERIFICATION-GAP, AGENT-NOTE, OPERATOR-NOTE, CODE-SMELL) tell you what kind of fix each entry needs. The triage tells you where to aim it.
 
 ## Customize me
 
-This skill is a generic framework. To adapt it to your project:
+This skill is a framework. To adapt it to your project:
 
-1. **Replace the classification examples** — The current examples reference
-   CONTRACTX conventions. Replace with your project's own failure patterns.
-2. **Add your own artifact sources** — If your project has different evidence
-   sources (e.g., a bug tracker, CI logs, deployment dashboard), add them to
-   the "Reconstruct from evidence" step.
-3. **Adjust the severity rules** — Change escalation thresholds or add new
-   failure classes that match your domain.
+1. **Map your models and harnesses** — Replace the model/harness examples with the ones you actually use.
+2. **Define your step types** — Your project has its own task stages. Add them to the triage.
+3. **Adjust the classification** — The 5 classes cover most patterns, but add more if your domain has specific failure modes.
 
 ## Troubleshooting
 
 | Problem | Likely cause | Fix |
 |---|---|---|
-| Retro feels shallow | Only looked at git commits | Add artifact sources: hand-back tables, RESULT.md, session notes |
-| Same issue keeps recurring | AGENT-NOTE wasn't deduped | Check NOTES.md — second occurrence auto-escalates |
-| Classification feels forced | A real problem doesn't fit any class | File a CX gap for the missing class definition |
-| Retro blames the agent | Operator forgot rule 2 | Retro fixes the system, never the agent. Re-read the rules. |
+| Retro feels shallow | Agent wasn't given the retro skill to self-report | Make sure SKILL.md is in `.claude/skills/` |
+| Pattern not visible yet | Only one session captured | Accumulate 5+ retros. Patterns need volume. |
+| Triage feels random | Not logging model/harness consistently | Standardize: every entry gets model + harness + step |
+| Same issue keeps recurring | AGENT-NOTE wasn't deduped | NOTES.md auto-dedupes on second occurrence |
 
 ## License
 
