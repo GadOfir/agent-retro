@@ -70,7 +70,11 @@ One of the skills in the [Kingdom of God](https://gadofir.github.io/kingdom-of-g
 | CONTRACTX | Contracts | https://gadofir.github.io/contractx-starter/ |
 | Shit Hit The Fan | Triage | https://gadofir.github.io/shit-hit-the-fan/ |
 | Agent Retro | Learning | https://gadofir.github.io/agent-retro/ |
+| TechDebt | Drift | https://gadofir.github.io/techdebt/ |
 | LOS | Memory (optional) | https://gadofir.github.io/LOS-starter/ |
+
+Advisory wiring only — if CONTRACTX / TechDebt are installed the retro files into them;
+if not, it records findings in your own docs. Works standalone.
 
 ### Plug-in skills feed the retro
 

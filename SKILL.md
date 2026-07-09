@@ -14,6 +14,18 @@ is better.
 
 These are NOT product gaps. They are agent runtime issues.
 
+## Standalone-first
+
+Agent Retro runs on its own. The cross-skill actions below are **advisory**: take them
+*if that skill is installed*, otherwise record the finding wherever your project keeps
+its rules and debt.
+
+- **CONTRACTX present?** File a CX gap + update the contract. **Absent?** Write the rule
+  into your own rules doc / README.
+- **TechDebt or a debt ledger present?** Send drift there. **Absent?** Note it in your
+  own debt tracker.
+- Nothing here requires a sibling skill to exist.
+
 ## Workflow
 
 ### 1. Reconstruct from primary evidence — NOT narrative memory
@@ -46,10 +58,13 @@ risk — the commits look clean but the session was not.
 
 ### 4. Apply
 
-- CX-CANDIDATE + VERIFICATION-GAP: file CX gap + update contract. Same-commit.
+> These actions assume the named skill is installed. If it is not, use your own
+> equivalent (rules doc, debt tracker) — the retro still runs.
+
+- CX-CANDIDATE + VERIFICATION-GAP: file CX gap + update contract (if CONTRACTX in use). Same-commit.
 - AGENT-NOTE: append to NOTES.md. Format: "YYYY-MM-DD — <pattern> — <pointer to contract/file>". Dedupe on append (grep first). Second occurrence of same pattern -> escalate to CX-CANDIDATE.
 - Dead approach: append to the dead-approaches register in the retro commit. That is the file that prevents retries — NOTES.md is where lessons go to be forgotten.
-- Dirty runtime state / config drift found during retro -> tech-debt ledger + CX per its guard rule. NOT SMELLS.md.
+- Dirty runtime state / config drift found during retro -> tech-debt ledger (or TechDebt, if present) + CX per its guard rule. Else your own debt tracker. NOT SMELLS.md.
 - CODE-SMELL: append to SMELLS.md. One line + date + file:line pointer. Dedupe. No essays.
 - OPERATOR-NOTE: report inline. Do not file.
 
